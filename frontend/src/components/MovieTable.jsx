@@ -1,7 +1,18 @@
 import React from 'react';
 import { styles } from '../styles/styles';
+import { API_URL } from '../constants';
 
 function MovieTable({ movies, onEdit, onDelete }) {
+  // Construct full image URL if it's a relative path
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // For relative paths like /uploads/filename
+    return `${API_URL.replace('/api', '')}${imageUrl}`;
+  };
+
   return (
     <div style={{ overflowX: 'auto' }}>
       <table style={styles.adminTable}>
@@ -21,7 +32,7 @@ function MovieTable({ movies, onEdit, onDelete }) {
             <tr key={movie._id}>
               <td style={styles.td}>
                 {movie.imageUrl ? (
-                  <img src={movie.imageUrl} alt={movie.title} style={styles.tableImage} />
+                  <img src={getImageUrl(movie.imageUrl)} alt={movie.title} style={styles.tableImage} />
                 ) : (
                   <div style={{ 
                     ...styles.tableImage, 

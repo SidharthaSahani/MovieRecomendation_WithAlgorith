@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import { toast } from 'react-toastify';
 import { styles } from '../styles/styles';
 import { API_URL } from '../constants';
-import MovieCard from '../components/MovieCard';
+import RecommendationCard from '../components/RecommendationCard';
 import LoadingState from '../components/LoadingState';
 
 function MovieDetailPage() {
@@ -13,6 +13,16 @@ function MovieDetailPage() {
   const [movie, setMovie] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Construct full image URL if it's a relative path
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // For relative paths like /uploads/filename
+    return `${API_URL.replace('/api', '')}${imageUrl}`;
+  };
 
   useEffect(() => {
     fetchMovie();
@@ -24,9 +34,9 @@ function MovieDetailPage() {
       const response = await axios.get(`${API_URL}/movies/${id}`);
       setMovie(response.data);
       
-      // Fetch recommendations
-      const recResponse = await axios.get(`${API_URL}/movies/recommend/${response.data.genre}`);
-      setRecommendations(recResponse.data.filter(m => m._id !== id));
+      // Fetch content-based recommendations
+      const recResponse = await axios.get(`${API_URL}/recommendations/similar/${id}`);
+      setRecommendations(recResponse.data);
     } catch (error) {
       toast.error('Failed to fetch movie details');
       navigate('/');
@@ -39,13 +49,15 @@ function MovieDetailPage() {
     return <LoadingState message="Loading movie details..." />;
   }
 
+  const fullImageUrl = getImageUrl(movie.imageUrl);
+
   return (
     <div style={styles.detailPage}>
       <Link to="/" style={styles.backButton}>← Back to Movies</Link>
       
       <div style={styles.detailContainer}>
-        {movie.imageUrl ? (
-          <img src={movie.imageUrl} alt={movie.title} style={styles.detailImage} />
+        {fullImageUrl ? (
+          <img src={fullImageUrl} alt={movie.title} style={styles.detailImage} />
         ) : (
           <div style={{ 
             ...styles.detailImage, 
@@ -82,10 +94,15 @@ function MovieDetailPage() {
 
       {recommendations.length > 0 && (
         <div style={styles.recommendSection}>
-          <h2 style={styles.recommendTitle}>More {movie.genre} Movies</h2>
+          <h2 style={styles.recommendTitle}>
+            🎯 Recommended For You
+          </h2>
+          <p style={{ color: '#a0a0a0', marginBottom: '20px', fontSize: '14px' }}>
+            Based on content similarity analysis
+          </p>
           <div style={styles.moviesGrid}>
             {recommendations.slice(0, 4).map(rec => (
-              <MovieCard key={rec._id} movie={rec} />
+              <RecommendationCard key={rec._id} movie={rec} />
             ))}
           </div>
         </div>

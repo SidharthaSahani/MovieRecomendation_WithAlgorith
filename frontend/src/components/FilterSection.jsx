@@ -30,10 +30,10 @@ function FilterSection({ search, setSearch, selectedGenre, setSelectedGenre, sor
         <option value="latest">Latest First</option>
         <option value="rating">Highest Rated</option>
         <option value="year">Release Year</option>
-        {/* <option value="title">Title A-Z</option> */}
+        <option value="title">Title A-Z</option>
       </select>
     </div>
   );
 }
 
-export default FilterSection;       
+export default FilterSection;

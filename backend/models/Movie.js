@@ -55,6 +55,10 @@ const movieSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  imageUrl: {
+    type: String,
+    default: ''
+  },
   image: {
     data: Buffer,
     contentType: String

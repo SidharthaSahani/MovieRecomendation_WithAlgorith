@@ -1,9 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { styles } from '../styles/styles';
+import { API_URL } from '../constants';
 
 function MovieCard({ movie }) {
   const navigate = useNavigate();
+
+  // Construct full image URL if it's a relative path
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // For relative paths like /uploads/filename
+    return `${API_URL.replace('/api', '')}${imageUrl}`;
+  };
+
+  const fullImageUrl = getImageUrl(movie.imageUrl);
 
   return (
     <div
@@ -18,8 +31,8 @@ function MovieCard({ movie }) {
         e.currentTarget.style.boxShadow = 'none';
       }}
     >
-      {movie.imageUrl ? (
-        <img src={movie.imageUrl} alt={movie.title} style={styles.movieImage} />
+      {fullImageUrl ? (
+        <img src={fullImageUrl} alt={movie.title} style={styles.movieImage} />
       ) : (
         <div style={{ 
           ...styles.movieImage, 
