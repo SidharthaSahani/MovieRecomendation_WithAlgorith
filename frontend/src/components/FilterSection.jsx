@@ -7,7 +7,7 @@ function FilterSection({ search, setSearch, selectedGenre, setSelectedGenre, sor
     <div style={styles.filterSection}>
       <input
         type="text"
-        placeholder="🔍 Search movies, directors..."
+        placeholder=" Search movies, directors..."
         style={styles.searchInput}
         value={search}
         onChange={(e) => setSearch(e.target.value)}

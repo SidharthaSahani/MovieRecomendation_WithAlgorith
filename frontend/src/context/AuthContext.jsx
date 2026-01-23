@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from '../utils/axiosConfig';
 
 const AuthContext = createContext(null);
 
@@ -7,12 +8,31 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    const verifyToken = async () => {
+      const token = localStorage.getItem('adminToken');
+      if (token) {
+        try {
+          const response = await axios.post('/api/auth/verify', {}, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          if (response.data.valid) {
+            setIsAuthenticated(true);
+          } else {
+            // Token is invalid, remove it
+            localStorage.removeItem('adminToken');
+            setIsAuthenticated(false);
+          }
+        } catch (error) {
+          // Verification failed, remove invalid token
+          localStorage.removeItem('adminToken');
+          setIsAuthenticated(false);
+        }
+      }
+      setLoading(false);
+    };
+
+    verifyToken();
   }, []);
 
   const login = (token) => {

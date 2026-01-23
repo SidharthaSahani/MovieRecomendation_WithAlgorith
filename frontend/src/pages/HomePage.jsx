@@ -47,7 +47,6 @@ function HomePage() {
       <div style={styles.heroSection}>
         <h1 style={styles.heroTitle}>Discover Amazing Movies</h1>
         <p style={styles.heroSubtitle}>
-          Explore our curated collection of movies across all genres. Find your next favorite film today!
         </p>
       </div>
 
