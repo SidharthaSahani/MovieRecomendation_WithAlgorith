@@ -11,7 +11,7 @@ const app = express();
 const authRoutes = require('./routes/authRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
-const authMiddleware = require('./middleware/authMiddleware');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 // Middleware
 app.use(cors());
@@ -30,6 +30,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/orange', 
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
