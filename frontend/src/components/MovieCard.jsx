@@ -23,11 +23,13 @@ function MovieCard({ movie }) {
       style={styles.movieCard}
       onClick={() => navigate(`/movie/${movie._id}`)}
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-10px)';
-        e.currentTarget.style.boxShadow = '0 20px 40px rgba(233, 69, 96, 0.3)';
+        e.currentTarget.style.borderColor = styles.movieCardHover.borderColor;
+        e.currentTarget.style.transform = styles.movieCardHover.transform;
+        e.currentTarget.style.boxShadow = styles.movieCardHover.boxShadow;
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.borderColor = '#000';
+        e.currentTarget.style.transform = 'none';
         e.currentTarget.style.boxShadow = 'none';
       }}
     >
@@ -41,7 +43,7 @@ function MovieCard({ movie }) {
           justifyContent: 'center', 
           fontSize: '48px' 
         }}>
-          🎬
+          
         </div>
       )}
       <div style={styles.movieInfo}>
@@ -50,7 +52,7 @@ function MovieCard({ movie }) {
           <span style={styles.genreBadge}>{movie.genre}</span>
           <span style={styles.rating}>⭐ {movie.rating.toFixed(1)}</span>
         </div>
-        <p style={{ color: '#a0a0a0', fontSize: '14px' }}>
+        <p style={{ color: '#666', fontSize: '14px', fontWeight: '600' }}>
           {movie.releaseYear} • {movie.duration} min
         </p>
       </div>

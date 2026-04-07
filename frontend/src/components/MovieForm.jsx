@@ -13,6 +13,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
           value={formData.title}
           onChange={handleInputChange}
           style={styles.input}
+          onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+          onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
           required
           placeholder="Enter movie title"
         />
@@ -25,6 +27,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
           value={formData.description}
           onChange={handleInputChange}
           style={styles.textarea}
+          onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+          onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
           required
           placeholder="Enter movie description"
         />
@@ -53,6 +57,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
             value={formData.releaseYear}
             onChange={handleInputChange}
             style={styles.input}
+            onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+            onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
             required
             min="1900"
             max={new Date().getFullYear() + 5}
@@ -69,6 +75,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
             value={formData.rating}
             onChange={handleInputChange}
             style={styles.input}
+            onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+            onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
             min="0"
             max="10"
             step="0.1"
@@ -82,6 +90,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
             value={formData.duration}
             onChange={handleInputChange}
             style={styles.input}
+            onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+            onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
             required
             min="1"
           />
@@ -96,6 +106,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
           value={formData.director}
           onChange={handleInputChange}
           style={styles.input}
+          onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+          onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
           required
           placeholder="Enter director name"
         />
@@ -109,6 +121,8 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
           value={formData.cast}
           onChange={handleInputChange}
           style={styles.input}
+          onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+          onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
           required
           placeholder="Enter main cast (comma separated)"
         />
@@ -131,7 +145,18 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
         <button type="button" style={styles.cancelButton} onClick={onCancel}>
           Cancel
         </button>
-        <button type="submit" style={styles.submitButton}>
+        <button
+          type="submit"
+          style={styles.submitButton}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = styles.submitButtonHover.background;
+            e.currentTarget.style.transform = styles.submitButtonHover.transform;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = styles.submitButton.background;
+            e.currentTarget.style.transform = 'none';
+          }}
+        >
           {editingMovie ? 'Update Movie' : 'Add Movie'}
         </button>
       </div>

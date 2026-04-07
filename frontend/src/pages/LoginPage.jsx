@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from '../utils/axiosConfig';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
@@ -8,34 +8,41 @@ import { styles } from '../styles/styles';
 
 function LoginPage() {
   const [credentials, setCredentials] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { loginUser } = useAuth();
 
   const handleChange = (e) => {
     setCredentials({
       ...credentials,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     try {
+      // Regular user login (checked in DB)
       const response = await axios.post(`${API_URL}/auth/login`, credentials);
       
       if (response.data.token) {
-        login(response.data.token);
+        loginUser(response.data.user, response.data.token);
         toast.success('Login successful!');
-        navigate('/admin');
+        navigate('/'); // Users always go to home
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Invalid credentials');
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Invalid user credentials';
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -45,21 +52,27 @@ function LoginPage() {
     <div style={loginStyles.container}>
       <div style={loginStyles.loginBox}>
         <div style={loginStyles.logoSection}>
-          <span style={loginStyles.logo}>🎬</span>
-          <h1 style={loginStyles.title}>Admin Login</h1>
-          <p style={loginStyles.subtitle}>Sign in to manage movies</p>
+          <span style={loginStyles.logo}></span>
+          <h1 style={loginStyles.title}>Sign In</h1>
+          <p style={loginStyles.subtitle}>Welcome back to MovieHub</p>
         </div>
+
+        {error && (
+          <div style={loginStyles.errorAlert}>
+             {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} style={loginStyles.form}>
           <div style={styles.formGroup}>
-            <label style={styles.label}>Username</label>
+            <label style={styles.label}>Email</label>
             <input
-              type="text"
-              name="username"
-              value={credentials.username}
+              type="email"
+              name="email"
+              value={credentials.email}
               onChange={handleChange}
               style={styles.input}
-              placeholder="Enter your username"
+              placeholder="Enter your email"
               required
               autoFocus
             />
@@ -94,6 +107,9 @@ function LoginPage() {
         </form>
 
         <div style={loginStyles.footer}>
+          <p style={loginStyles.footerText}>
+            Don't have an account? <Link to="/register" style={loginStyles.link}>Register here</Link>
+          </p>
           <button
             onClick={() => navigate('/')}
             style={loginStyles.backButton}
@@ -113,37 +129,50 @@ const loginStyles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '20px',
-    background: 'linear-gradient(135deg, rgba(233, 69, 96, 0.1) 0%, rgba(22, 33, 62, 0.5) 100%)',
+    background: '#fff',
   },
   loginBox: {
-    background: 'rgba(26, 26, 46, 0.95)',
-    borderRadius: '20px',
+    background: '#ffffff',
     padding: '40px',
     width: '100%',
-    maxWidth: '450px',
-    border: '1px solid rgba(233, 69, 96, 0.3)',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    maxWidth: '400px',
+    border: '2px solid #000',
   },
   logoSection: {
     textAlign: 'center',
     marginBottom: '30px',
   },
   logo: {
-    fontSize: '64px',
+    fontSize: '48px',
     display: 'block',
-    marginBottom: '15px',
+    marginBottom: '10px',
   },
   title: {
-    fontSize: '32px',
-    fontWeight: '700',
+    fontSize: '28px',
+    fontWeight: '800',
     marginBottom: '8px',
-    background: 'linear-gradient(90deg, #e94560, #ff6b6b)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#000',
+    textTransform: 'uppercase',
   },
   subtitle: {
-    color: '#a0a0a0',
-    fontSize: '16px',
+    color: '#666',
+    fontSize: '14px',
+    textTransform: 'uppercase',
+    fontWeight: '600',
+  },
+  errorAlert: {
+    background: '#fff',
+    border: '1px solid #000',
+    color: '#000',
+    padding: '12px 15px',
+    fontSize: '13px',
+    marginBottom: '20px',
+    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    fontWeight: '700',
   },
   form: {
     display: 'flex',
@@ -153,15 +182,28 @@ const loginStyles = {
   footer: {
     marginTop: '25px',
     textAlign: 'center',
+    borderTop: '1px solid #eee',
+    paddingTop: '20px',
+  },
+  footerText: {
+    color: '#666',
+    marginBottom: '10px',
+    fontSize: '13px',
+  },
+  link: {
+    color: '#000',
+    textDecoration: 'underline',
+    fontWeight: '700',
   },
   backButton: {
     background: 'transparent',
-    color: '#e94560',
+    color: '#000',
     border: 'none',
     padding: '10px',
-    fontSize: '14px',
+    fontSize: '12px',
     cursor: 'pointer',
-    textDecoration: 'none',
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
 };
 

@@ -4,14 +4,15 @@ import { useAuth } from '../context/AuthContext';
 import LoadingState from './LoadingState';
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAdminAuthenticated, loading } = useAuth();
 
   if (loading) {
     return <LoadingState message="Checking authentication..." />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  // Strictly check if admin session is active
+  if (!isAdminAuthenticated) {
+    return <Navigate to="/admin/login" replace />;
   }
 
   return children;

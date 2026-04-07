@@ -9,11 +9,21 @@ function FilterSection({ search, setSearch, selectedGenre, setSelectedGenre, sor
         type="text"
         placeholder=" Search movies, directors..."
         style={styles.searchInput}
+        onFocus={(e) => {
+          e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow;
+          e.currentTarget.style.borderColor = '#000';
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.borderColor = styles.searchInput.border.split(' ')[2];
+        }}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
       <select
         style={styles.select}
+        onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+        onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
         value={selectedGenre}
         onChange={(e) => setSelectedGenre(e.target.value)}
       >
@@ -24,6 +34,8 @@ function FilterSection({ search, setSearch, selectedGenre, setSelectedGenre, sor
       </select>
       <select
         style={styles.select}
+        onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+        onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
         value={sortBy}
         onChange={(e) => setSortBy(e.target.value)}
       >

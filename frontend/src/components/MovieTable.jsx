@@ -39,9 +39,9 @@ function MovieTable({ movies, onEdit, onDelete }) {
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center', 
-                    background: '#2a2a4a' 
+                    background: '#f5f5f5' 
                   }}>
-                    🎬
+                    
                   </div>
                 )}
               </td>

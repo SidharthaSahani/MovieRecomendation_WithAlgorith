@@ -143,8 +143,19 @@ function AdminPage() {
   return (
     <div style={styles.adminContainer}>
       <div style={styles.adminHeader}>
-        <h1 style={styles.adminTitle}>🎬 Movie Management</h1>
-        <button style={styles.addButton} onClick={openAddModal}>
+        <h1 style={styles.adminTitle}> Movie Management</h1>
+        <button
+          style={styles.addButton}
+          onClick={openAddModal}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#333';
+            e.currentTarget.style.transform = 'scale(0.98)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = styles.addButton.background;
+            e.currentTarget.style.transform = 'none';
+          }}
+        >
           ➕ Add New Movie
         </button>
       </div>
