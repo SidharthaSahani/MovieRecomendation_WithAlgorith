@@ -156,7 +156,7 @@ function AdminPage() {
             e.currentTarget.style.transform = 'none';
           }}
         >
-          ➕ Add New Movie
+           Add New Movie
         </button>
       </div>
 
@@ -175,7 +175,7 @@ function AdminPage() {
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title={editingMovie ? '✏️ Edit Movie' : '➕ Add New Movie'}
+        title={editingMovie ? ' Edit Movie' : ' Add New Movie'}
       >
         <MovieForm
           formData={formData}

@@ -57,13 +57,13 @@ function MovieTable({ movies, onEdit, onDelete }) {
                   style={{ ...styles.actionButton, ...styles.editButton }}
                   onClick={() => onEdit(movie)}
                 >
-                  ✏️ Edit
+                   Edit
                 </button>
                 <button
                   style={{ ...styles.actionButton, ...styles.deleteButton }}
                   onClick={() => onDelete(movie._id)}
                 >
-                  🗑️ Delete
+                   Delete
                 </button>
               </td>
             </tr>
