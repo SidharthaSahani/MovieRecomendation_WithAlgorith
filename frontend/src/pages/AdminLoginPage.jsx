@@ -52,7 +52,7 @@ function AdminLoginPage() {
     <div style={adminLoginStyles.container}>
       <div style={adminLoginStyles.loginBox}>
         <div style={adminLoginStyles.logoSection}>
-          <span style={adminLoginStyles.logo}>🔐</span>
+          <span style={adminLoginStyles.logo}></span>
           <h1 style={adminLoginStyles.title}>Admin Portal</h1>
           <p style={adminLoginStyles.subtitle}>Restricted Access Only</p>
         </div>

@@ -110,11 +110,14 @@ function MovieDetailPage() {
           <h1 style={styles.detailTitle}>{movie.title}</h1>
           <div style={styles.detailMeta}>
             <span style={styles.genreBadge}>{movie.genre}</span>
+            <span style={{ ...styles.metaItem, color: '#000', borderColor: '#000', borderWidth: '2px', background: '#fff' }}>
+              {movie.language || 'English'}
+            </span>
             <span style={{ ...styles.metaItem, color: '#000', borderColor: '#000', borderWidth: '2px' }}>
               ⭐ {movie.rating.toFixed(1)}
             </span>
             <span style={{ ...styles.metaItem, color: '#000', borderColor: '#000', borderWidth: '2px' }}>{movie.releaseYear}</span>
-            <span style={{ ...styles.metaItem, color: '#000', borderColor: '#000', borderWidth: '2px' }}>🕐 {movie.duration} min</span>
+            <span style={{ ...styles.metaItem, color: '#000', borderColor: '#000', borderWidth: '2px' }}>{movie.duration} min</span>
           </div>
           <p style={styles.description}>{movie.description}</p>
           <div style={styles.infoRow}>
@@ -131,7 +134,7 @@ function MovieDetailPage() {
       {recommendations.length > 0 && (
         <div style={styles.recommendSection}>
           <h2 style={styles.recommendTitle}>
-            🎯 Recommended For You
+              Recommended For You
           </h2>
           <p style={{ color: '#666', marginBottom: '20px', fontSize: '14px', textTransform: 'uppercase', fontWeight: '700' }}>
             Based on content similarity analysis

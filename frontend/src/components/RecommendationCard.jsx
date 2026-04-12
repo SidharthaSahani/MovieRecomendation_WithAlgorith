@@ -19,14 +19,14 @@ function RecommendationCard({ movie }) {
   const fullImageUrl = getImageUrl(movie.imageUrl);
   
   // Get recommendation reason based on similarity score breakdown
-  const getRecommendationReason = () => {
-    if (!movie.scoreBreakdown) return 'Similar characteristics';
-    
+  const displayReason = movie.reason || (movie.scoreBreakdown ? (() => {
     const reasons = [];
     const breakdown = movie.scoreBreakdown;
     
     if (breakdown.genre > 0.9) reasons.push('same genre');
     else if (breakdown.genre > 0.4) reasons.push('similar genre');
+    
+    if (breakdown.language > 0.9) reasons.push('same language');
     
     if (breakdown.director > 0.9) reasons.push('same director');
     else if (breakdown.director > 0.2) reasons.push('similar director');
@@ -34,13 +34,14 @@ function RecommendationCard({ movie }) {
     if (breakdown.year > 0.7) reasons.push('from the same era');
     if (breakdown.rating > 0.7) reasons.push('similar rating');
     if (breakdown.cast > 0.3) reasons.push('shared cast');
+    if (breakdown.description > 0.3) reasons.push('similar story');
     
     if (reasons.length === 0) return 'Similar characteristics';
     if (reasons.length === 1) return reasons[0].charAt(0).toUpperCase() + reasons[0].slice(1);
     if (reasons.length === 2) return `${reasons[0]} and ${reasons[1]}`;
     
     return `${reasons.slice(0, -1).join(', ')}, and ${reasons[reasons.length - 1]}`;
-  };
+  })() : 'Similar characteristics');
 
   return (
     <div
@@ -74,6 +75,7 @@ function RecommendationCard({ movie }) {
         <h3 style={styles.movieTitle}>{movie.title}</h3>
         <div style={styles.movieMeta}>
           <span style={styles.genreBadge}>{movie.genre}</span>
+          <span style={{ ...styles.genreBadge, background: '#fff', color: '#000', border: '1px solid #000' }}>{movie.language || 'English'}</span>
           <span style={styles.rating}>⭐ {movie.rating.toFixed(1)}</span>
         </div>
         
@@ -89,7 +91,7 @@ function RecommendationCard({ movie }) {
             <div style={{ marginBottom: '4px', fontWeight: '800', color: '#000', textTransform: 'uppercase' }}>
               {(movie.similarityScore * 100).toFixed(0)}% Match
             </div>
-            <div style={{ fontWeight: '600' }}>{getRecommendationReason()}</div>
+            <div style={{ fontWeight: '600' }}>{displayReason}</div>
           </div>
         )}
         

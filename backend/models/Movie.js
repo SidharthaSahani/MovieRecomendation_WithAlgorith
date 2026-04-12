@@ -33,6 +33,11 @@ const movieSchema = new mongoose.Schema({
       'Western'
     ]
   },
+  language: {
+    type: String,
+    required: true,
+    default: 'English'
+  },
   releaseYear: {
     type: Number,
     required: true

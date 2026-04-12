@@ -13,14 +13,16 @@
 
 // Weights for different attributes (total = 1.0)
 // Think of these like "Importance Points". 
-// Genre is the most important (35 points), like the type of toy (is it a car or a doll?).
+// Genre is the most important (30 points), like the type of toy (is it a car or a doll?).
 // We use these points to decide which movie features matter most when picking.
 const WEIGHTS = {
-  genre: 0.35,        // Genre is most important (Type of movie)
-  director: 0.25,     // Director style matters (Who made it)
-  releaseYear: 0.15,  // Year proximity (Is it old or new?)
+  genre: 0.30,        // Genre is very important (Type of movie)
+  language: 0.15,     // Language match (Can you understand it?)
   rating: 0.15,       // Similar quality (Do people like it?)
+  director: 0.10,     // Director style (Who made it)
   cast: 0.10,         // Cast overlap (Who is acting in it?)
+  releaseYear: 0.10,  // Year proximity (Is it old or new?)
+  description: 0.10,  // Story similarity (What it's about)
 };
 
 /**
@@ -75,6 +77,49 @@ function genreSimilarity(movie1, movie2) {
   if (movie1.genre === movie2.genre && relatedGenres[movie1.genre] === movie2.genre) {
     return 1.0;
   }
+  
+  return 0;
+}
+
+/**
+ * Calculate similarity score for description
+ * Uses Jaccard similarity on significant words
+ * 
+ * --- DATA TALK ---
+ * It looks at the "description" text of both movies.
+ * It removes simple words (like "the", "and") and punctuation.
+ * Then it checks how many important words match in both stories!
+ */
+function descriptionSimilarity(movie1, movie2) {
+  if (!movie1.description || !movie2.description) return 0;
+  
+  // Clean description and split into words
+  const cleanWords = (text) => 
+    text.toLowerCase()
+      .replace(/[^\w\s]/g, '') // remove punctuation
+      .split(/\s+/)            // split by space
+      .filter(word => word.length > 3); // only keep longer words
+  
+  const words1 = cleanWords(movie1.description);
+  const words2 = cleanWords(movie2.description);
+  
+  return jaccardSimilarity(words1, words2);
+}
+
+/**
+ * Calculate similarity score for language
+ * 
+ * --- DATA TALK ---
+ * It compares the "language" property.
+ * If both movies are in the same language, they get a perfect score!
+ */
+function languageSimilarity(movie1, movie2) {
+  if (!movie1.language || !movie2.language) return 0;
+  
+  const lang1 = movie1.language.toLowerCase().trim();
+  const lang2 = movie2.language.toLowerCase().trim();
+  
+  if (lang1 === lang2) return 1.0;
   
   return 0;
 }
@@ -191,18 +236,22 @@ export function calculateSimilarity(targetMovie, candidateMovie) {
   if (targetMovie._id === candidateMovie._id) return 0;
   
   const genreScore = genreSimilarity(targetMovie, candidateMovie);
+  const languageScore = languageSimilarity(targetMovie, candidateMovie);
   const directorScore = directorSimilarity(targetMovie, candidateMovie);
   const yearScore = yearSimilarity(targetMovie, candidateMovie);
   const ratingScore = ratingSimilarity(targetMovie, candidateMovie);
   const castScore = castSimilarity(targetMovie, candidateMovie);
+  const descriptionScore = descriptionSimilarity(targetMovie, candidateMovie);
   
   // Total Score = (Score * Weight) + (Score * Weight) ...
   const totalScore = 
     (genreScore * WEIGHTS.genre) +
+    (languageScore * WEIGHTS.language) +
     (directorScore * WEIGHTS.director) +
     (yearScore * WEIGHTS.releaseYear) +
     (ratingScore * WEIGHTS.rating) +
-    (castScore * WEIGHTS.cast);
+    (castScore * WEIGHTS.cast) +
+    (descriptionScore * WEIGHTS.description);
   
   return totalScore;
 }
@@ -221,8 +270,8 @@ export function calculateSimilarity(targetMovie, candidateMovie) {
 export function getRecommendations(targetMovie, allMovies, limit = 6) {
   // Calculate similarity scores for all movies
   const moviesWithScores = allMovies
-    // Step 1: Filter - Only same genre, and not the same movie
-    .filter(movie => movie._id !== targetMovie._id && movie.genre === targetMovie.genre) 
+    // Step 1: Filter - Remove the movie you just clicked (No hard genre filter!)
+    .filter(movie => movie._id !== targetMovie._id) 
     .map(movie => ({
       ...movie,
       // Step 2: Calculate Similarity Score
@@ -230,10 +279,12 @@ export function getRecommendations(targetMovie, allMovies, limit = 6) {
       // Step 3: Keep individual scores for the "Reason" explanation
       scores: {
         genre: genreSimilarity(targetMovie, movie),
+        language: languageSimilarity(targetMovie, movie),
         director: directorSimilarity(targetMovie, movie),
         year: yearSimilarity(targetMovie, movie),
         rating: ratingSimilarity(targetMovie, movie),
         cast: castSimilarity(targetMovie, movie),
+        description: descriptionSimilarity(targetMovie, movie),
       }
     }))
     // Step 4: Only keep movies that have some similarity
@@ -258,6 +309,8 @@ export function getRecommendationReason(scores) {
   if (scores.genre > 0.9) reasons.push('same genre');
   else if (scores.genre > 0.4) reasons.push('similar genre');
   
+  if (scores.language > 0.9) reasons.push('same language');
+  
   if (scores.director > 0.9) reasons.push('same director');
   else if (scores.director > 0.2) reasons.push('similar director');
   
@@ -266,6 +319,8 @@ export function getRecommendationReason(scores) {
   if (scores.rating > 0.7) reasons.push('similar rating');
   
   if (scores.cast > 0.3) reasons.push('shared cast members');
+  
+  if (scores.description > 0.3) reasons.push('similar story elements');
   
   // Combine all reasons into a nice sentence
   if (reasons.length === 0) return 'similar characteristics';

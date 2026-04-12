@@ -7,11 +7,13 @@ const Movie = require('../models/Movie');
  */
 
 const WEIGHTS = {
-  genre: 0.35,
-  director: 0.25,
-  releaseYear: 0.15,
+  genre: 0.30,
+  language: 0.15,
   rating: 0.15,
+  director: 0.10,
   cast: 0.10,
+  releaseYear: 0.10,
+  description: 0.10,
 };
 
 function jaccardSimilarity(arr1, arr2) {
@@ -25,24 +27,28 @@ function jaccardSimilarity(arr1, arr2) {
 
 function genreSimilarity(movie1, movie2) {
   if (movie1.genre === movie2.genre) return 1.0;
-  
-  const relatedGenres = {
-    'Action': ['Adventure', 'Thriller', 'Sci-Fi'],
-    'Adventure': ['Action', 'Fantasy'],
-    'Comedy': ['Romance', 'Family'],
-    'Drama': ['Romance', 'Mystery'],
-    'Horror': ['Thriller', 'Mystery'],
-    'Sci-Fi': ['Action', 'Thriller', 'Fantasy'],
-    'Fantasy': ['Adventure', 'Sci-Fi'],
-    'Romance': ['Drama', 'Comedy'],
-    'Thriller': ['Action', 'Horror', 'Mystery'],
-    'Mystery': ['Thriller', 'Crime', 'Drama'],
-    'Crime': ['Thriller', 'Mystery', 'Drama'],
-  };
-  
-  const related = relatedGenres[movie1.genre] || [];
-  if (related.includes(movie2.genre)) return 0.5;
   return 0;
+}
+
+function languageSimilarity(movie1, movie2) {
+  if (!movie1.language || !movie2.language) return 0;
+  if (movie1.language.toLowerCase().trim() === movie2.language.toLowerCase().trim()) return 1.0;
+  return 0;
+}
+
+function descriptionSimilarity(movie1, movie2) {
+  if (!movie1.description || !movie2.description) return 0;
+  
+  const cleanWords = (text) => 
+    text.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3);
+  
+  const words1 = cleanWords(movie1.description);
+  const words2 = cleanWords(movie2.description);
+  
+  return jaccardSimilarity(words1, words2);
 }
 
 function directorSimilarity(movie1, movie2) {
@@ -89,28 +95,50 @@ function calculateSimilarity(targetMovie, candidateMovie) {
   if (targetMovie._id.toString() === candidateMovie._id.toString()) return 0;
   
   const genreScore = genreSimilarity(targetMovie, candidateMovie);
-  const directorScore = directorSimilarity(targetMovie, candidateMovie);
-  const yearScore = yearSimilarity(targetMovie, candidateMovie);
+  const languageScore = languageSimilarity(targetMovie, candidateMovie);
   const ratingScore = ratingSimilarity(targetMovie, candidateMovie);
+  const directorScore = directorSimilarity(targetMovie, candidateMovie);
   const castScore = castSimilarity(targetMovie, candidateMovie);
+  const yearScore = yearSimilarity(targetMovie, candidateMovie);
+  const descriptionScore = descriptionSimilarity(targetMovie, candidateMovie);
   
   const totalScore = 
     (genreScore * WEIGHTS.genre) +
-    (directorScore * WEIGHTS.director) +
-    (yearScore * WEIGHTS.releaseYear) +
+    (languageScore * WEIGHTS.language) +
     (ratingScore * WEIGHTS.rating) +
-    (castScore * WEIGHTS.cast);
+    (directorScore * WEIGHTS.director) +
+    (castScore * WEIGHTS.cast) +
+    (yearScore * WEIGHTS.releaseYear) +
+    (descriptionScore * WEIGHTS.description);
   
   return {
     score: totalScore,
     breakdown: {
       genre: genreScore,
-      director: directorScore,
-      year: yearScore,
+      language: languageScore,
       rating: ratingScore,
-      cast: castScore
+      director: directorScore,
+      cast: castScore,
+      year: yearScore,
+      description: descriptionScore
     }
   };
+}
+
+function getRecommendationReason(scores) {
+  const reasons = [];
+  if (scores.genre > 0.9) reasons.push('same genre');
+  if (scores.language > 0.9) reasons.push('same language');
+  if (scores.director > 0.9) reasons.push('same director');
+  if (scores.year > 0.7) reasons.push('from same era');
+  if (scores.rating > 0.7) reasons.push('similar rating');
+  if (scores.cast > 0.3) reasons.push('shared cast');
+  if (scores.description > 0.3) reasons.push('similar story');
+  
+  if (reasons.length === 0) return 'Similar characteristics';
+  if (reasons.length === 1) return reasons[0];
+  if (reasons.length === 2) return `${reasons[0]} and ${reasons[1]}`;
+  return `${reasons.slice(0, -1).join(', ')}, and ${reasons[reasons.length - 1]}`;
 }
 
 // @route   GET /api/recommendations/:movieId
@@ -151,18 +179,16 @@ router.get('/:movieId', async (req, res) => {
         genre: targetMovie.genre
       },
       recommendations: recommendations.map(item => ({
-        ...item.movie,
+        title: item.movie.title,
+        genre: item.movie.genre,
+        rating: item.movie.rating,
+        language: item.movie.language || 'English',
         similarityScore: item.similarityScore.toFixed(3),
-        scoreBreakdown: {
-          genre: item.scoreBreakdown.genre.toFixed(2),
-          director: item.scoreBreakdown.director.toFixed(2),
-          year: item.scoreBreakdown.year.toFixed(2),
-          rating: item.scoreBreakdown.rating.toFixed(2),
-          cast: item.scoreBreakdown.cast.toFixed(2)
-        }
+        reason: getRecommendationReason(item.scoreBreakdown),
+        _id: item.movie._id, // Keep _id for navigation
+        imageUrl: item.movie.imageUrl // Keep imageUrl for UI
       })),
-      algorithm: 'content-based-filtering',
-      weights: WEIGHTS
+      algorithm: 'content-based-filtering'
     });
   } catch (error) {
     console.error('Recommendation error:', error);
@@ -183,10 +209,19 @@ router.get('/similar/:movieId', async (req, res) => {
     const allMovies = await Movie.find({ _id: { $ne: req.params.movieId } });
     
     const recommendations = allMovies
-      .map(movie => ({
-        ...movie.toObject(),
-        similarityScore: calculateSimilarity(targetMovie, movie).score
-      }))
+      .map(movie => {
+        const similarity = calculateSimilarity(targetMovie, movie);
+        return {
+          _id: movie._id,
+          title: movie.title,
+          genre: movie.genre,
+          rating: movie.rating,
+          language: movie.language || 'English',
+          imageUrl: movie.imageUrl,
+          similarityScore: similarity.score,
+          reason: getRecommendationReason(similarity.breakdown)
+        };
+      })
       .filter(movie => movie.similarityScore > 0)
       .sort((a, b) => b.similarityScore - a.similarityScore)
       .slice(0, 6);

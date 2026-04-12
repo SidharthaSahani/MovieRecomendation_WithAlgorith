@@ -50,6 +50,20 @@ function MovieForm({ formData, handleInputChange, handleSubmit, handleImageChang
           </select>
         </div>
         <div style={styles.formGroup}>
+          <label style={styles.label}>Language *</label>
+          <input
+            type="text"
+            name="language"
+            value={formData.language}
+            onChange={handleInputChange}
+            style={styles.input}
+            onFocus={(e) => e.currentTarget.style.boxShadow = styles.inputFocus.boxShadow}
+            onBlur={(e) => e.currentTarget.style.boxShadow = 'none'}
+            required
+            placeholder="Enter movie language (e.g. English)"
+          />
+        </div>
+        <div style={styles.formGroup}>
           <label style={styles.label}>Release Year *</label>
           <input
             type="number"

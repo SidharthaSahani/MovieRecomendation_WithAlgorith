@@ -50,6 +50,7 @@ function MovieCard({ movie }) {
         <h3 style={styles.movieTitle}>{movie.title}</h3>
         <div style={styles.movieMeta}>
           <span style={styles.genreBadge}>{movie.genre}</span>
+          <span style={{ ...styles.genreBadge, background: '#fff', color: '#000', border: '1px solid #000' }}>{movie.language || 'English'}</span>
           <span style={styles.rating}>⭐ {movie.rating.toFixed(1)}</span>
         </div>
         <p style={{ color: '#666', fontSize: '14px', fontWeight: '600' }}>
